@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bmax Technology | Carregadores elétricos",
-  description: "Soluções inteligentes de recarga para casas, empresas e grandes estacionamentos.",
+  title: "Bmax Technology | Mobilidade elétrica",
+  description: "Carregadores elétricos para residências, empresas, estacionamentos e revendedores no Sul do Brasil.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
