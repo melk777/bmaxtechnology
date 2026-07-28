@@ -1,30 +1,36 @@
-const whatsapp = "https://wa.me/554598437229?text=Olá%2C%20quero%20um%20orçamento%20para%20um%20carregador%20Bmax.";
+"use client";
+
+import { useEffect, useState } from "react";
+
+const whatsapp = "https://wa.me/554598437229?text=Ol%C3%A1%2C%20quero%20um%20or%C3%A7amento%20para%20um%20carregador%20Bmax.";
+
+const scenes = [
+  { id: "resort", number: "01", eyebrow: "HOTÉIS E RESORTS", title: "A melhor chegada é a que já está carregando.", body: "Transforme seu estacionamento em uma experiência premium para hóspedes e visitantes.", product: "CDZ-T", power: "Recarga rápida DC · 60 kW ou 80 kW", image: "/products/cdz-t.png", className: "resort" },
+  { id: "home", number: "02", eyebrow: "RECARGA EM CASA", title: "Sua rotina sai com energia total.", body: "A solução compacta para recarregar com conforto, segurança e controle na sua própria vaga.", product: "CDZ-E", power: "Wallbox AC · 7 kW ou 22 kW", image: "/products/cdz-e.png", className: "home" },
+  { id: "station", number: "03", eyebrow: "ELETROPOSTOS", title: "Um novo motivo para o cliente parar.", body: "Instale recarga rápida no seu posto e crie uma nova parada para quem está em movimento.", product: "CDZ-WY", power: "Recarga rápida DC · até 120 kW", image: "/products/cdz-wy.png", className: "station" },
+  { id: "scale", number: "04", eyebrow: "ALTA POTÊNCIA", title: "Sua operação pronta para crescer.", body: "Projetos robustos para alto fluxo, com equipamentos, instalação e suporte comercial no Sul do Brasil.", product: "CDZ-YE", power: "Recarga rápida DC · até 120 kW", image: "/products/cdz-ye.png", className: "scale" },
+];
 
 const products = [
-  { id: "CDZ-E", type: "RESIDENCIAL", power: "7 kW ou 22 kW", image: "/products/cdz-e.png", title: "Wallbox inteligente", copy: "Recarga AC compacta para casas, condomínios e vagas privativas.", specs: ["Tipo 2 · cabo de 5 m", "Wi-Fi, Ethernet e 4G", "IP55 · RFID"] },
-  { id: "CDZ-B", type: "COMERCIAL AC", power: "Até 44 kW", image: "/products/cdz-b.png", title: "Recarga dupla em coluna", copy: "Duas saídas para empresas, hotéis, condomínios e estacionamentos.", specs: ["2 saídas de até 22 kW", "Tipo 2 · OCPP 1.6", "IP66 · IK10"] },
-  { id: "CDZ-T", type: "RECARGA RÁPIDA", power: "60 kW ou 80 kW", image: "/products/cdz-t.png", title: "Potência que atrai clientes", copy: "Carregamento rápido DC com mídia, controle de acesso e dois conectores.", specs: ["2 conectores CCS2", "Tela touch + mídia de 43\"", "RFID · LAN · Wi-Fi"] },
-  { id: "CDZ-WY", type: "ALTA DEMANDA", power: "60 kW, 80 kW ou 120 kW", image: "/products/cdz-wy.png", title: "Fluxo rápido, operação robusta", copy: "Solução DC para redes comerciais, estacionamentos e operações em expansão.", specs: ["2 conectores CCS2", "Eficiência de até 95%", "IP55 · IK10"] },
-  { id: "CDZ-YE", type: "ALTA DEMANDA", power: "60 kW, 80 kW ou 120 kW", image: "/products/cdz-ye.png", title: "Recarga, mídia e experiência", copy: "Uma estação premium para locais de alto fluxo e grande visibilidade.", specs: ["Tela publicitária de 22\"", "LAN · Wi-Fi · 4G", "RFID · gerenciamento de cabos"] },
+  ["CDZ-E", "Residencial", "7 kW ou 22 kW", "/products/cdz-e.png"],
+  ["CDZ-B", "Comercial AC", "Até 44 kW", "/products/cdz-b.png"],
+  ["CDZ-T", "Recarga rápida", "60 kW ou 80 kW", "/products/cdz-t.png"],
+  ["CDZ-WY", "Alta demanda", "60 kW, 80 kW ou 120 kW", "/products/cdz-wy.png"],
+  ["CDZ-YE", "Alta demanda", "60 kW, 80 kW ou 120 kW", "/products/cdz-ye.png"],
 ];
 
 export default function Home() {
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    const updateActive = () => { const sections = document.querySelectorAll<HTMLElement>("[data-scene]"); const center = window.innerHeight * .52; let next = 0; sections.forEach((section, index) => { const rect = section.getBoundingClientRect(); if (rect.top <= center && rect.bottom >= center) next = index; }); setActive(next); };
+    updateActive(); window.addEventListener("scroll", updateActive, { passive: true }); return () => window.removeEventListener("scroll", updateActive);
+  }, []);
+  const current = scenes[active];
   return <main>
-    <section className="hero" id="inicio">
-      <nav className="nav container"><a href="#inicio" className="logo"><img src="/logo-bmax.png" alt="Bmax Technology" /><span>Bmax<br /><b>Technology</b></span></a><div className="links"><a href="#solucoes">Soluções</a><a href="#produtos">Produtos</a><a href="#revenda">Revenda</a></div><a className="outline" href={whatsapp} target="_blank">Falar com especialista ↗</a></nav>
-      <div className="container hero-content"><p className="kicker">MOBILIDADE ELÉTRICA PARA O SUL DO BRASIL</p><h1>Onde a cidade<br /><i>continua em movimento.</i></h1><p className="hero-copy">A Bmax Technology conecta residências, negócios e grandes operações a uma nova forma de energia: inteligente, confiável e pronta para o agora.</p><div className="actions"><a className="primary" href={whatsapp} target="_blank">Solicitar orçamento <span>→</span></a><a className="text-button" href="#produtos">Explorar carregadores ↓</a></div><div className="hero-rail"><span>01</span><b>Energia para cada destino</b><span>Role para descobrir</span></div></div>
-      <div className="city"><div className="skyline"><i/><i/><i/><i/><i/><i/><i/></div><div className="road"/><div className="ev-car"><div className="car-glow"/><div className="car-body"><span/><span/></div><div className="wheel left"/><div className="wheel right"/></div><div className="hero-station"><img src="/products/cdz-e.png" alt="Carregador Bmax" /><div className="charge-line"/><b>RECARGANDO</b></div></div>
-    </section>
-
-    <section className="intro container" id="solucoes"><div><p className="kicker dark">UMA REDE QUE CRESCE COM VOCÊ</p><h2>Do primeiro carregador<br />à sua próxima expansão.</h2></div><p>Não existe uma solução única para todos. Por isso, a Bmax trabalha com equipamentos para quem recarrega em casa, recebe clientes, administra estacionamentos ou quer revender mobilidade elétrica.</p></section>
-
-    <section className="journey"><div className="container"><p className="kicker">PENSE NO SEU DESTINO</p><div className="journey-grid"><article><span>01</span><h3>Em casa</h3><p>Tenha seu veículo pronto para sair todos os dias.</p></article><article><span>02</span><h3>No seu negócio</h3><p>Crie uma experiência que faz o cliente ficar mais tempo.</p></article><article><span>03</span><h3>Na cidade</h3><p>Atenda grandes fluxos com recarga rápida e gestão inteligente.</p></article></div></div></section>
-
-    <section className="products container" id="produtos"><div className="section-head"><div><p className="kicker dark">LINHA BMAX</p><h2>Escolha a energia<br />do seu projeto.</h2></div><p>Cada versão de potência é um equipamento próprio, configurado para a necessidade e o orçamento do seu projeto.</p></div><div className="product-grid">{products.map((p) => <article className="product" key={p.id}><div className="product-top"><span>{p.type}</span><b>{p.id}</b></div><div className="product-image"><img src={p.image} alt={`Carregador ${p.id}`} /></div><p className="power">{p.power}</p><h3>{p.title}</h3><p className="product-copy">{p.copy}</p><ul>{p.specs.map((s) => <li key={s}>{s}</li>)}</ul><a href={whatsapp} target="_blank">Orçar esta versão <span>→</span></a></article>)}</div></section>
-
-    <section className="partner" id="revenda"><div className="container partner-grid"><div><p className="kicker">PARCEIRO BMAX</p><h2>Transforme<br />energia em negócio.</h2><p>Para empresas e revendedores que querem levar mobilidade elétrica para novos clientes, projetos e cidades.</p><a className="primary light" href={whatsapp} target="_blank">Quero ser revendedor <span>→</span></a></div><div className="partner-card"><span>ATENDEMOS O SUL DO BRASIL</span><strong>Uma nova rota<br />para o seu negócio.</strong><small>Residencial · Comercial · Revenda</small></div></div></section>
-
-    <section className="cta container"><p className="kicker dark">COMECE AGORA</p><h2>Seu projeto de recarga<br />começa com uma conversa.</h2><a className="primary" href={whatsapp} target="_blank">Chamar no WhatsApp <span>→</span></a></section>
-    <footer><div className="container footer"><a href="#inicio" className="logo"><img src="/logo-bmax.png" alt="Bmax Technology" /><span>Bmax<br /><b>Technology</b></span></a><span>Mobilidade elétrica para o Sul do Brasil.</span><span>© 2026 Bmax Technology</span></div></footer>
+    <nav className="topbar"><a className="brand" href="#inicio"><img src="/logo-bmax.png" alt="Bmax Technology" /><span>Bmax <b>Technology</b></span></a><div className="toplinks"><a href="#catalogo">Catálogo</a><a href="#projeto">Para empresas</a><a href={whatsapp} target="_blank">WhatsApp ↗</a></div></nav>
+    <section className="world" id="inicio"><div className={`world-stage stage-${current.className}`}><div className="resort-photo" /><div className="world-grid" /><div className="ambient-orb orb-one" /><div className="ambient-orb orb-two" /><div className="scene-city" /><img className={`scene-product product-${current.className}`} src={current.image} alt={`Carregador Bmax ${current.product}`} /><div className="charge-pulse" /><div className="stage-scrim" /><div className="stage-copy"><p className="eyebrow">{current.eyebrow}</p><h1>{current.title}</h1><p>{current.body}</p><div className="scene-meta"><b>{current.product}</b><span>{current.power}</span></div>{active === 3 ? <a className="button" href={whatsapp} target="_blank">Falar sobre meu projeto <span>→</span></a> : <a className="button" href="#catalogo">Conhecer soluções <span>↓</span></a>}</div><div className="stage-number"><span>{current.number}</span><small>/ 04</small></div><div className="stage-progress">{scenes.map((scene, index) => <a key={scene.id} href={`#${scene.id}`} className={index === active ? "active" : ""} aria-label={`Ir para ${scene.eyebrow}`}><i /></a>)}</div><p className="scroll-hint">ROLE PARA EXPLORAR <span>↓</span></p></div><div className="world-scroll">{scenes.map(scene => <section className="scroll-marker" data-scene id={scene.id} key={scene.id} aria-label={scene.eyebrow} />)}</div></section>
+    <section className="statement"><p className="eyebrow ink">ENERGIA PARA CADA DESTINO</p><h2>Não vendemos uma potência genérica.<br />Projetamos a recarga certa para o seu espaço.</h2><p>Cada potência é um equipamento próprio e recebe um orçamento específico para a sua instalação.</p></section>
+    <section className="catalog" id="catalogo"><div className="catalog-head"><div><p className="eyebrow ink">LINHA BMAX</p><h2>Escolha o próximo<br />ponto de energia.</h2></div><a href={whatsapp} target="_blank">Quero o catálogo completo <span>→</span></a></div><div className="catalog-grid">{products.map(([id,type,power,image]) => <article key={id}><div className="catalog-label"><span>{type}</span><b>{id}</b></div><img src={image} alt={`Carregador Bmax ${id}`} /><p>{power}</p><a href={whatsapp} target="_blank">Solicitar orçamento <span>→</span></a></article>)}</div></section>
+    <section className="project" id="projeto"><p className="eyebrow">BMAX TECHNOLOGY</p><h2>Do projeto à instalação,<br />a sua energia começa aqui.</h2><p>Residências, empresas, hotéis, estacionamentos, eletropostos e revendedores no Sul do Brasil.</p><a className="button light" href={whatsapp} target="_blank">Chamar no WhatsApp <span>→</span></a></section><footer><span>© 2026 Bmax Technology</span><span>Mobilidade elétrica para o Sul do Brasil.</span></footer>
   </main>;
 }
