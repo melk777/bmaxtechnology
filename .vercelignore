@@ -1,0 +1,8 @@
+# Cloudflare/Vinext starter files are not part of the Next.js landing page.
+build/
+db/
+drizzle/
+examples/
+worker/
+drizzle.config.ts
+vite.config.ts
