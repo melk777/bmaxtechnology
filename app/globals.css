@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* Primary conversion actions stay highly visible over every journey scene. */
+.toplinks{align-items:center!important;gap:8px!important;padding:6px!important;border:1px solid #ffffff4d!important;border-radius:999px!important;background:#061827c9!important;backdrop-filter:blur(10px)!important}.toplinks a{padding:10px 14px!important;border-radius:999px!important;color:#eef9ff!important;font-weight:800!important;letter-spacing:.1px!important}.toplinks a:last-child{background:#e1262e!important;color:#fff!important;box-shadow:0 8px 22px #0005!important}
 /* Immersive, full-frame environments for the four desktop stops. */
 .stage-home .resort-photo{background-image:url('/scenes/home.png')!important;opacity:1!important;transform:scale(1)!important}.stage-station .resort-photo{background-image:url('/scenes/station.png')!important;opacity:1!important;transform:scale(1)!important}.stage-scale .resort-photo{background-image:url('/scenes/scale.png')!important;opacity:1!important;transform:scale(1)!important}.world-stage .scene-product{display:none!important}
 .world-grid,.ambient-orb,.scene-city,.charge-pulse{display:none!important}
