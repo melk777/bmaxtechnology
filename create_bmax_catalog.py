@@ -120,7 +120,10 @@ def cover(c):
     c.rect(20 * mm, 30 * mm, 42 * mm, 0.9 * mm, fill=1, stroke=0)
     c.setFillColor(WHITE)
     c.setFont(BOLD, 9)
-    c.drawString(20 * mm, 22 * mm, "CATÁLOGO DE SOLUÇÕES  |  2026")
+    c.drawString(20 * mm, 24 * mm, "CATÁLOGO DE SOLUÇÕES  |  2026")
+    c.setFont(REG, 8.5)
+    c.setFillColor(colors.HexColor("#CFE2ED"))
+    c.drawString(20 * mm, 17 * mm, "www.bmaxbrasil.com.br")
 
 
 def intro(c, page):
