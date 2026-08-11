@@ -41,4 +41,6 @@ next-env.d.ts
 /outputs/
 /work/
 /.agents/
+/tmp/
+*.tsbuildinfo
 skills-lock.json

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <rect width="1600" height="1000" fill="#f2f4f3"/>
+  <rect x="70" y="60" width="1460" height="220" rx="28" fill="#071624"/>
+  <text x="130" y="150" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="70" font-weight="800" letter-spacing="-2">BMAX TECHNOLOGY</text>
+  <text x="130" y="213" fill="#55d6ff" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" letter-spacing="6">PALETA DE CORES OFICIAL • SITE E COMUNICAÇÃO</text>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <g transform="translate(70 350)"><rect width="430" height="460" rx="22" fill="#071624"/><text x="35" y="330" fill="#ffffff" font-size="33" font-weight="800">AZUL-MARINHO</text><text x="35" y="380" fill="#b8cbd6" font-size="28" font-weight="700">#071624</text><text x="35" y="422" fill="#b8cbd6" font-size="20">Base institucional</text></g>
+    <g transform="translate(585 350)"><rect width="430" height="460" rx="22" fill="#0d8ac5"/><text x="35" y="330" fill="#ffffff" font-size="33" font-weight="800">AZUL ELÉTRICO</text><text x="35" y="380" fill="#d9f3ff" font-size="28" font-weight="700">#0D8AC5</text><text x="35" y="422" fill="#d9f3ff" font-size="20">Tecnologia e energia</text></g>
+    <g transform="translate(1100 350)"><rect width="430" height="460" rx="22" fill="#55d6ff"/><text x="35" y="330" fill="#071624" font-size="33" font-weight="800">CIANO</text><text x="35" y="380" fill="#183b50" font-size="28" font-weight="700">#55D6FF</text><text x="35" y="422" fill="#183b50" font-size="20">Luz, conexão e destaque</text></g>
+    <g transform="translate(70 850)"><circle cx="24" cy="0" r="16" fill="#e1262e"/><text x="56" y="8" fill="#526a77" font-size="22" font-weight="700">DESTAQUE / CTA: #E1262E</text><circle cx="505" cy="0" r="16" fill="#f2f4f3" stroke="#cbd8de" stroke-width="2"/><text x="537" y="8" fill="#526a77" font-size="22" font-weight="700">FUNDO CLARO: #F2F4F3</text><text x="1530" y="8" text-anchor="end" fill="#526a77" font-size="19" font-weight="700">bmaxbrasil.com.br</text></g>
+  </g>
+</svg>
