@@ -147,8 +147,9 @@ function toMunicipalPoints(elements: any[]): Point[] {
 export default function VisitasPage() {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const leafletMap = useRef<any>(null);
-  const markers = useRef<any[]>([]);
+  const markerLayer = useRef<any>(null);
   const [leafletReady, setLeafletReady] = useState(false);
+  const [clusterReady, setClusterReady] = useState(false);
   const [municipalPoints, setMunicipalPoints] = useState<Point[]>([...fozProspects]);
   const [municipalState, setMunicipalState] = useState<"loading" | "ready" | "fallback">("loading");
   const [filter, setFilter] = useState("Todos");
@@ -210,20 +211,27 @@ export default function VisitasPage() {
   useEffect(() => {
     if (!leafletMap.current || !window.L) return;
     const L = window.L;
-    markers.current.forEach((marker) => marker.remove());
-    markers.current = visible.map((point) => {
-      const marker = L.circleMarker([point.latitude, point.longitude], {
-        radius: point.id === selectedId ? 12 : 9,
-        color: "#ffffff",
-        weight: 2,
-        fillColor: point.potential === "Alta" ? "#e1262e" : "#1496d4",
-        fillOpacity: 1,
-      }).addTo(leafletMap.current);
+    markerLayer.current?.remove();
+    const layer = clusterReady && typeof L.markerClusterGroup === "function"
+      ? L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 48, spiderfyOnMaxZoom: true })
+      : L.layerGroup();
+    visible.forEach((point) => {
+      const marker = L.marker([point.latitude, point.longitude], {
+        icon: L.divIcon({
+          className: "",
+          html: `<i style="display:block;width:18px;height:18px;border:3px solid #fff;border-radius:50%;background:${point.potential === "Alta" ? "#e1262e" : "#1496d4"};box-shadow:${point.id === selectedId ? "0 0 0 5px #e1262e32,0 2px 9px #08233366" : "0 2px 9px #08233366"};transform:${point.id === selectedId ? "scale(1.35)" : "scale(1)"}"></i>`,
+          iconSize: [26, 26],
+          iconAnchor: [13, 13],
+        }),
+      });
       marker.bindTooltip(`<strong>${point.name}</strong><br/>${point.segment}`, { direction: "top", offset: [0, -9] });
+      marker.bindPopup(`<strong>${point.name}</strong><br/><span>${point.segment} · potencial ${point.potential.toLowerCase()}</span><br/><small>${point.address}</small>`);
       marker.on("click", () => { setSelectedId(point.id); setSaved(false); });
-      return marker;
+      layer.addLayer(marker);
     });
-  }, [visible, selectedId]);
+    layer.addTo(leafletMap.current);
+    markerLayer.current = layer;
+  }, [visible, selectedId, clusterReady]);
 
   useEffect(() => {
     if (leafletMap.current) leafletMap.current.flyTo([selected.latitude, selected.longitude], 15, { duration: 0.6 });
@@ -239,7 +247,10 @@ export default function VisitasPage() {
   return (
     <main className="visits-page">
       <Script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" strategy="afterInteractive" onLoad={() => setLeafletReady(true)} />
+      <Script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" strategy="afterInteractive" onLoad={() => setClusterReady(true)} />
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+      <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+      <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
       <header className="visits-header">
         <Link href="/" className="visits-brand"><img src="/logo-bmax.png" alt="Bmaxbrasil" /><span>BMAX<span>BRASIL</span></span></Link>
         <div><span className="header-live"><i /> OPERAÇÃO COMERCIAL</span><Link href="/">← Voltar ao site</Link></div>
