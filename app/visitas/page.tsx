@@ -104,6 +104,14 @@ out center tags;`;
 
 function normalizedName(name: string) { return name.trim().toLocaleLowerCase("pt-BR"); }
 
+// Órgãos e equipamentos públicos não entram na rota de venda direta.
+// Eles exigem acompanhamento de compras públicas, edital ou processo próprio.
+const publicInstitutionPattern = /\b(upa|unidade de pronto atendimento|unidade básica de saúde|ubs|hospital municipal|escola municipal|colégio estadual|universidade federal|instituto federal|unila|prefeitura|câmara municipal|secretaria municipal|receita federal|aduana|pol[ií]cia|delegacia|corpo de bombeiros|f[oó]rum|defensoria|minist[eé]rio p[uú]blico|parque zool[oó]gico bosque guarani|centro de recep[cç][aã]o de visitantes.*itaipu|ecomuseu de itaipu)\b/i;
+
+function isDirectSalesLead(point: Point) {
+  return !publicInstitutionPattern.test(`${point.name} ${point.address}`);
+}
+
 function mapSegment(tags: Record<string, string>) {
   if (/hotel|resort|motel|guest_house|hostel/.test(tags.tourism ?? "")) return "Hotel";
   if (tags.amenity === "fuel") return "Posto";
@@ -159,7 +167,10 @@ export default function VisitasPage() {
   const [saved, setSaved] = useState(false);
   const points = useMemo(() => {
     const priorityNames = new Set(priorityPoints.map((point) => normalizedName(point.name)));
-    return [...priorityPoints, ...municipalPoints.filter((point) => !priorityNames.has(normalizedName(point.name)))];
+    return [
+      ...priorityPoints.filter(isDirectSalesLead),
+      ...municipalPoints.filter((point) => isDirectSalesLead(point) && !priorityNames.has(normalizedName(point.name))),
+    ];
   }, [municipalPoints]);
   const filters = useMemo(() => ["Todos", ...Array.from(new Set(points.map((point) => point.segment))).sort((a, b) => a.localeCompare(b, "pt-BR"))], [points]);
   const selected = points.find((point) => point.id === selectedId) ?? points[0];

@@ -40,6 +40,11 @@ function address(tags) {
   return street ? `${street} — Foz do Iguaçu, PR` : "Foz do Iguaçu, PR";
 }
 
+function isPublicInstitution(tags) {
+  const text = Object.values(tags).join(" ");
+  return /\b(upa|unidade de pronto atendimento|unidade básica de saúde|ubs|hospital municipal|escola municipal|colégio estadual|universidade federal|instituto federal|unila|prefeitura|câmara municipal|secretaria municipal|receita federal|aduana|pol[ií]cia|delegacia|corpo de bombeiros|f[oó]rum|defensoria|minist[eé]rio p[uú]blico|parque zool[oó]gico bosque guarani|centro de recep[cç][aã]o de visitantes.*itaipu|ecomuseu de itaipu)\b/i.test(text);
+}
+
 let response;
 for (const endpoint of endpoints) {
   try {
@@ -61,6 +66,7 @@ const points = response.elements
     const latitude = element.lat ?? element.center?.lat;
     const longitude = element.lon ?? element.center?.lon;
     if (!tags.name || latitude == null || longitude == null) return null;
+    if (isPublicInstitution(tags)) return null;
     // Keeps the municipal commercial map focused on Foz do Iguaçu itself.
     if (latitude < -25.66 || latitude > -25.39 || longitude < -54.66 || longitude > -54.39) return null;
     const type = segment(tags);
