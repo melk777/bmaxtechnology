@@ -1,9 +1,17 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function AcessoVisitasPage() {
+  return (
+    <Suspense fallback={<main className="access-page" aria-busy="true" />}>
+      <AcessoVisitasContent />
+    </Suspense>
+  );
+}
+
+function AcessoVisitasContent() {
   const router = useRouter();
   const params = useSearchParams();
   const [code, setCode] = useState("");
