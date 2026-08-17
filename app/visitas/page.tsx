@@ -245,11 +245,13 @@ export default function VisitasPage() {
   }, [visible, selectedId, clusterReady]);
 
   useEffect(() => {
-    if (leafletMap.current) leafletMap.current.flyTo([selected.latitude, selected.longitude], 15, { duration: 0.6 });
+    // A lista funciona como um painel de controle: ao escolher uma empresa,
+    // o mapa posiciona o ponto imediatamente, sem deslocar a página inteira.
+    if (leafletMap.current) leafletMap.current.setView([selected.latitude, selected.longitude], 16, { animate: false });
     setVisitStatus(selected.status);
     setNote("");
     setSaved(false);
-  }, [selected]);
+  }, [selected, leafletReady]);
 
   function selectPoint(id: string) { setSelectedId(id); }
   function directionsUrl(point: Point) { return `https://www.google.com/maps/dir/?api=1&destination=${point.latitude},${point.longitude}`; }
