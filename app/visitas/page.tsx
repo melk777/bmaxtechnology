@@ -266,7 +266,7 @@ export default function VisitasPage() {
       <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
       <header className="visits-header">
         <Link href="/" className="visits-brand"><img src="/logo-bmax.png" alt="Bmaxbrasil" /><span>BMAX<span>BRASIL</span></span></Link>
-        <div><span className="header-live"><i /> OPERAÇÃO COMERCIAL</span><Link href="/">← Voltar ao site</Link></div>
+        <div><span className="header-live"><i /> OPERAÇÃO COMERCIAL</span><Link href="/visitas/jose-valerio">Rota José Valério</Link><Link href="/">← Voltar ao site</Link></div>
       </header>
 
       <section className="visits-hero">
