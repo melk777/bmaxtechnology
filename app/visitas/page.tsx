@@ -3,11 +3,12 @@
 import Link from "next/link";
 import Script from "next/script";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { fozProspects } from "@/data/foz-prospects";
 
 type Point = {
   id: string;
   name: string;
-  segment: "Hotel" | "Posto" | "Varejo" | "Estacionamento" | "Atração";
+  segment: string;
   address: string;
   latitude: number;
   longitude: number;
@@ -20,7 +21,7 @@ declare global {
   interface Window { L?: any }
 }
 
-const points: Point[] = [
+const priorityPoints: Point[] = [
   // Prioridades comerciais já trabalhadas pela Bmaxbrasil
   { id: "formula", name: "Auto Posto Fórmula Foz — Matriz", segment: "Posto", address: "Av. Jorge Schimmelpfeng, 891 — Centro", latitude: -25.5409, longitude: -54.5868, potential: "Alta", status: "A visitar" },
   { id: "foz", name: "Hotel Foz do Iguaçu", segment: "Hotel", address: "Av. Brasil, 97 — Centro", latitude: -25.5455, longitude: -54.5897, potential: "Alta", status: "A visitar", contact: "Reservas e operações" },
@@ -90,20 +91,108 @@ const points: Point[] = [
   { id: "bosque-guarani", name: "Parque Zoológico Bosque Guarani", segment: "Atração", address: "Centro — Foz do Iguaçu", latitude: -25.533091, longitude: -54.589887, potential: "Média", status: "A visitar" },
 ];
 
-const filters = ["Todos", "Hotel", "Posto", "Varejo", "Estacionamento", "Atração"] as const;
+const municipalQuery = `[out:json][timeout:120];
+area["name"="Foz do Iguaçu"]["boundary"="administrative"]->.city;
+(
+  nwr["tourism"~"hotel|resort|motel|guest_house|hostel|attraction|theme_park|zoo|museum"](area.city);
+  nwr["amenity"~"fuel|parking|hospital|clinic|college|university|school"](area.city);
+  nwr["shop"~"mall|supermarket|department_store|car|car_repair|motorcycle|wholesale"](area.city);
+  nwr["leisure"~"stadium|sports_centre"](area.city);
+  nwr["aeroway"="aerodrome"](area.city);
+);
+out center tags;`;
+
+function normalizedName(name: string) { return name.trim().toLocaleLowerCase("pt-BR"); }
+
+function mapSegment(tags: Record<string, string>) {
+  if (/hotel|resort|motel|guest_house|hostel/.test(tags.tourism ?? "")) return "Hotel";
+  if (tags.amenity === "fuel") return "Posto";
+  if (tags.amenity === "parking") return "Estacionamento";
+  if (/hospital|clinic/.test(tags.amenity ?? "")) return "Saúde";
+  if (/college|university|school/.test(tags.amenity ?? "")) return "Educação";
+  if (/car|car_repair|motorcycle/.test(tags.shop ?? "")) return "Automotivo";
+  if (/mall|supermarket|department_store|wholesale/.test(tags.shop ?? "")) return "Varejo";
+  if (tags.aeroway === "aerodrome") return "Transporte";
+  if (/stadium|sports_centre/.test(tags.leisure ?? "")) return "Esporte";
+  return "Atração";
+}
+
+function toMunicipalPoints(elements: any[]): Point[] {
+  const seen = new Set<string>();
+  return elements.flatMap((element) => {
+    const tags = (element.tags ?? {}) as Record<string, string>;
+    const latitude = element.lat ?? element.center?.lat;
+    const longitude = element.lon ?? element.center?.lon;
+    if (!tags.name || latitude == null || longitude == null) return [];
+    // Evita resultados turísticos externos à malha urbana/comercial de Foz.
+    if (latitude < -25.66 || latitude > -25.39 || longitude < -54.66 || longitude > -54.39) return [];
+    const key = normalizedName(tags.name);
+    if (seen.has(key)) return [];
+    seen.add(key);
+    const segment = mapSegment(tags);
+    const street = [tags["addr:street"], tags["addr:housenumber"]].filter(Boolean).join(", ");
+    return [{
+      id: `osm-${element.type}-${element.id}`,
+      name: tags.name,
+      segment,
+      address: street ? `${street} — Foz do Iguaçu, PR` : "Foz do Iguaçu, PR",
+      latitude: Number(latitude),
+      longitude: Number(longitude),
+      potential: ["Hotel", "Posto", "Estacionamento", "Transporte"].includes(segment) || tags.shop === "mall" || tags.tourism === "theme_park" ? "Alta" : "Média",
+      status: "A visitar",
+    }];
+  });
+}
 
 export default function VisitasPage() {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const leafletMap = useRef<any>(null);
   const markers = useRef<any[]>([]);
   const [leafletReady, setLeafletReady] = useState(false);
-  const [filter, setFilter] = useState<(typeof filters)[number]>("Todos");
+  const [municipalPoints, setMunicipalPoints] = useState<Point[]>([...fozProspects]);
+  const [municipalState, setMunicipalState] = useState<"loading" | "ready" | "fallback">("loading");
+  const [filter, setFilter] = useState("Todos");
   const [selectedId, setSelectedId] = useState("formula");
   const [visitStatus, setVisitStatus] = useState("A visitar");
   const [note, setNote] = useState("");
   const [saved, setSaved] = useState(false);
+  const points = useMemo(() => {
+    const priorityNames = new Set(priorityPoints.map((point) => normalizedName(point.name)));
+    return [...priorityPoints, ...municipalPoints.filter((point) => !priorityNames.has(normalizedName(point.name)))];
+  }, [municipalPoints]);
+  const filters = useMemo(() => ["Todos", ...Array.from(new Set(points.map((point) => point.segment))).sort((a, b) => a.localeCompare(b, "pt-BR"))], [points]);
   const selected = points.find((point) => point.id === selectedId) ?? points[0];
-  const visible = useMemo(() => filter === "Todos" ? points : points.filter((point) => point.segment === filter), [filter]);
+  const visible = useMemo(() => filter === "Todos" ? points : points.filter((point) => point.segment === filter), [filter, points]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadMunicipalBase() {
+      const endpoints = ["https://overpass.kumi.systems/api/interpreter", "https://overpass-api.de/api/interpreter"];
+      try {
+        for (const endpoint of endpoints) {
+          try {
+            const response = await fetch(endpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+              body: new URLSearchParams({ data: municipalQuery }),
+              signal: controller.signal,
+            });
+            if (!response.ok) continue;
+            const data = await response.json();
+            const imported = toMunicipalPoints(data.elements ?? []);
+            if (imported.length) setMunicipalPoints(imported);
+            setMunicipalState("ready");
+            return;
+          } catch (error) {
+            if ((error as Error).name === "AbortError") return;
+          }
+        }
+        setMunicipalState("fallback");
+      } catch { setMunicipalState("fallback"); }
+    }
+    loadMunicipalBase();
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     if (!leafletReady || !mapRef.current || !window.L || leafletMap.current) return;
@@ -159,7 +248,7 @@ export default function VisitasPage() {
       <section className="visits-hero">
         <p>PLANEJAMENTO DE CAMPO</p>
         <h1>Visitas que viram<br /><em>novos pontos de recarga.</em></h1>
-        <span>Foz do Iguaçu, PR · <b>{points.length} oportunidades mapeadas</b></span>
+        <span>Foz do Iguaçu, PR · <b>{points.length} oportunidades mapeadas</b> · {municipalState === "loading" ? "atualizando base municipal…" : municipalState === "ready" ? "base municipal atualizada" : "base comercial disponível"}</span>
       </section>
 
       <section className="visits-workspace">
