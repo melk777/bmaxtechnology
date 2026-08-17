@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 type Point = {
   id: string;
   name: string;
-  segment: "Hotel" | "Posto" | "Varejo" | "Estacionamento";
+  segment: "Hotel" | "Posto" | "Varejo" | "Estacionamento" | "Atração";
   address: string;
   latitude: number;
   longitude: number;
@@ -21,6 +21,7 @@ declare global {
 }
 
 const points: Point[] = [
+  // Prioridades comerciais já trabalhadas pela Bmaxbrasil
   { id: "formula", name: "Auto Posto Fórmula Foz — Matriz", segment: "Posto", address: "Av. Jorge Schimmelpfeng, 891 — Centro", latitude: -25.5409, longitude: -54.5868, potential: "Alta", status: "A visitar" },
   { id: "foz", name: "Hotel Foz do Iguaçu", segment: "Hotel", address: "Av. Brasil, 97 — Centro", latitude: -25.5455, longitude: -54.5897, potential: "Alta", status: "A visitar", contact: "Reservas e operações" },
   { id: "continental", name: "Hotel Continental Inn", segment: "Hotel", address: "Av. Paraná, 1089 — Centro", latitude: -25.5377, longitude: -54.5855, potential: "Alta", status: "A visitar" },
@@ -31,9 +32,65 @@ const points: Point[] = [
   { id: "italo", name: "Italo Supermercados", segment: "Varejo", address: "Rua Edmundo de Barros, 303 — Centro", latitude: -25.5447, longitude: -54.5852, potential: "Média", status: "A visitar" },
   { id: "bismillah", name: "Estacionamentos Bismillah", segment: "Estacionamento", address: "Rua Oswaldo Cruz, 368 — Vila Portes", latitude: -25.5128, longitude: -54.5901, potential: "Alta", status: "Em contato", contact: "Arif" },
   { id: "wish", name: "Wish Foz do Iguaçu", segment: "Hotel", address: "Av. das Cataratas, 6845 — Tamanduá", latitude: -25.5871, longitude: -54.4928, potential: "Alta", status: "Em contato", contact: "Gerência / infraestrutura" },
+  // Hotelaria e resorts: hóspedes permanecem mais tempo e valorizam recarga no destino.
+  { id: "rafain-palace", name: "Hotel Rafain Palace", segment: "Hotel", address: "Av. Olímpio Rafagnin, 2357 — Parque Imperatriz", latitude: -25.501368, longitude: -54.538477, potential: "Alta", status: "A visitar" },
+  { id: "recanto-cataratas", name: "Recanto Cataratas Thermas Resort", segment: "Hotel", address: "Rua Sérgio Gasparetto, 510 — Vila Yolanda", latitude: -25.511904, longitude: -54.548152, potential: "Alta", status: "A visitar" },
+  { id: "grand-carima", name: "Grand Carimã Resort & Convention Center", segment: "Hotel", address: "Av. das Cataratas, 4790 — Vila Carimã", latitude: -25.576872, longitude: -54.548824, potential: "Alta", status: "A visitar" },
+  { id: "vivaz", name: "Vivaz Cataratas Hotel Resort", segment: "Hotel", address: "Av. das Cataratas — Foz do Iguaçu", latitude: -25.582388, longitude: -54.52904, potential: "Alta", status: "A visitar" },
+  { id: "san-martin", name: "San Martin Hotel", segment: "Hotel", address: "Rodovia das Cataratas — Foz do Iguaçu", latitude: -25.613607, longitude: -54.48491, potential: "Alta", status: "A visitar" },
+  { id: "nacional-inn", name: "Hotel Nacional Inn", segment: "Hotel", address: "Av. das Cataratas, 8355 — Jardim Gleba II", latitude: -25.590784, longitude: -54.515901, potential: "Alta", status: "A visitar" },
+  { id: "san-juan", name: "Hotel San Juan", segment: "Hotel", address: "Av. das Cataratas — Foz do Iguaçu", latitude: -25.590071, longitude: -54.516653, potential: "Alta", status: "A visitar" },
+  { id: "viale-cataratas", name: "Hotel Viale Cataratas", segment: "Hotel", address: "Av. das Cataratas — Foz do Iguaçu", latitude: -25.561469, longitude: -54.56187, potential: "Alta", status: "A visitar" },
+  { id: "bourbon", name: "Bourbon Foz do Iguaçu Hotel", segment: "Hotel", address: "Av. Costa e Silva — Centro", latitude: -25.533676, longitude: -54.574647, potential: "Alta", status: "A visitar" },
+  { id: "falls-galli", name: "Hotel Falls Galli", segment: "Hotel", address: "Foz do Iguaçu, PR", latitude: -25.524897, longitude: -54.564248, potential: "Média", status: "A visitar" },
+  { id: "dom-pedro", name: "Dom Pedro I Palace Hotel", segment: "Hotel", address: "Foz do Iguaçu, PR", latitude: -25.562159, longitude: -54.559266, potential: "Média", status: "A visitar" },
+  { id: "iguacu-plaza", name: "Iguaçu Plaza Hotel", segment: "Hotel", address: "Rua Bartolomeu de Gusmão, 859 — Centro", latitude: -25.539473, longitude: -54.583791, potential: "Média", status: "A visitar" },
+  { id: "rouver", name: "Hotel Rouver", segment: "Hotel", address: "Av. Jorge Schimmelpfeng, 872 — Centro", latitude: -25.547169, longitude: -54.578981, potential: "Média", status: "A visitar" },
+  { id: "san-rafael", name: "San Rafael Hotel", segment: "Hotel", address: "Rua Almirante Barroso, 1660 — Centro", latitude: -25.540677, longitude: -54.584462, potential: "Média", status: "A visitar" },
+  { id: "vivaldi", name: "Rede Andrade — Vivaldi Hotel", segment: "Hotel", address: "Rua Sérgio Gasparetto, 934 — Portal da Foz", latitude: -25.503803, longitude: -54.539689, potential: "Média", status: "A visitar" },
+  { id: "stella-solaris", name: "Hotel Stella Solaris Samba", segment: "Hotel", address: "Av. Olímpio Rafagnin — Parque Imperatriz", latitude: -25.50969, longitude: -54.548948, potential: "Média", status: "A visitar" },
+  { id: "foz-ponte", name: "Hotel Foz Ponte", segment: "Hotel", address: "Vila Portes — Foz do Iguaçu", latitude: -25.513021, longitude: -54.59065, potential: "Média", status: "A visitar" },
+  { id: "paradizzo", name: "Hotel Paradizzo", segment: "Hotel", address: "Rua Cassiano Ricardo, 575 — Vila Portes", latitude: -25.512315, longitude: -54.592296, potential: "Média", status: "A visitar" },
+  { id: "mirante", name: "Mirante Hotel", segment: "Hotel", address: "Av. República Argentina, 672 — Centro", latitude: -25.534176, longitude: -54.587658, potential: "Média", status: "A visitar" },
+  { id: "lawrence", name: "Hotel Lawrence", segment: "Hotel", address: "Av. Paraná, 463 — Vila Maracanã", latitude: -25.544108, longitude: -54.576609, potential: "Média", status: "A visitar" },
+  { id: "kacique", name: "Kacique Salvatti Hotel", segment: "Hotel", address: "Centro — Foz do Iguaçu", latitude: -25.531193, longitude: -54.589404, potential: "Média", status: "A visitar" },
+  { id: "danny", name: "Danny Hotel", segment: "Hotel", address: "Av. Brasil, 509 — Centro", latitude: -25.538611, longitude: -54.585832, potential: "Média", status: "A visitar" },
+  // Varejo e centros de compras: estadia média e grande fluxo diário.
+  { id: "jl-shopping", name: "Cataratas JL Shopping", segment: "Varejo", address: "Av. Costa e Silva, 185 — Centro", latitude: -25.53324, longitude: -54.574921, potential: "Alta", status: "Em contato" },
+  { id: "catuai", name: "Shopping Catuaí Palladium", segment: "Varejo", address: "Av. das Cataratas, 3570 — Vila Yolanda", latitude: -25.568943, longitude: -54.55835, potential: "Alta", status: "A visitar" },
+  { id: "muffato-jl", name: "Super Muffato — Cataratas JL Shopping", segment: "Varejo", address: "Av. Costa e Silva, 185 — Centro", latitude: -25.53324, longitude: -54.574921, potential: "Alta", status: "A visitar" },
+  { id: "muffato-republica", name: "Muffato — República Argentina", segment: "Varejo", address: "Av. República Argentina — Foz do Iguaçu", latitude: -25.536978, longitude: -54.543105, potential: "Alta", status: "A visitar" },
+  { id: "atacadao", name: "Atacadão Foz do Iguaçu", segment: "Varejo", address: "Rua Nelson da Cunha Júnior, 350 — Vila Pérola", latitude: -25.510961, longitude: -54.577512, potential: "Alta", status: "A visitar" },
+  { id: "italo-republica", name: "Ítalo Supermercados — República Argentina", segment: "Varejo", address: "Av. República Argentina — Foz do Iguaçu", latitude: -25.536054, longitude: -54.558247, potential: "Alta", status: "A visitar" },
+  { id: "muffato-norte", name: "Muffato Supermercado", segment: "Varejo", address: "Região Norte — Foz do Iguaçu", latitude: -25.494275, longitude: -54.553695, potential: "Média", status: "A visitar" },
+  { id: "santa-ines", name: "Supermercado Santa Inês", segment: "Varejo", address: "Foz do Iguaçu, PR", latitude: -25.493234, longitude: -54.54499, potential: "Média", status: "A visitar" },
+  { id: "kasi-petropolis", name: "Kasi Supermercado — Jardim Petrópolis", segment: "Varejo", address: "Rua Belo Horizonte, 703 — Jardim Petrópolis", latitude: -25.488897, longitude: -54.578434, potential: "Média", status: "A visitar" },
+  { id: "kasi-belvedere", name: "Supermercado Kasi — Belvedere", segment: "Varejo", address: "Rua Guaraqueçaba, 409 — Jardim Belvedere", latitude: -25.476656, longitude: -54.579366, potential: "Média", status: "A visitar" },
+  { id: "nandi", name: "Supermercado Nandi", segment: "Varejo", address: "Foz do Iguaçu, PR", latitude: -25.481772, longitude: -54.50836, potential: "Média", status: "A visitar" },
+  { id: "shopping-mercosul", name: "Shopping Mercosul", segment: "Varejo", address: "Rua Rui Barbosa, 1032 — Centro", latitude: -25.53862, longitude: -54.582435, potential: "Média", status: "A visitar" },
+  // Postos: oportunidade para recarga rápida e aumento de permanência do cliente.
+  { id: "posto-uruqui", name: "Posto Uruçuí — Grupo Viale", segment: "Posto", address: "Av. Jorge Schimmelpfeng, 440 — Centro", latitude: -25.547242, longitude: -54.583493, potential: "Alta", status: "A visitar" },
+  { id: "posto-boneti", name: "Posto Boneti", segment: "Posto", address: "Av. das Cataratas, 894 — Vila Yolanda", latitude: -25.552512, longitude: -54.570681, potential: "Alta", status: "A visitar" },
+  { id: "posto-acaray", name: "Posto Acaray", segment: "Posto", address: "Foz do Iguaçu, PR", latitude: -25.490829, longitude: -54.509201, potential: "Alta", status: "A visitar" },
+  { id: "posto-prisma", name: "Posto Prisma", segment: "Posto", address: "Vila Portes — Foz do Iguaçu", latitude: -25.508539, longitude: -54.585052, potential: "Alta", status: "A visitar" },
+  { id: "posto-gasparin", name: "Posto Gasparin", segment: "Posto", address: "Av. Nilson Gottlieb — Foz do Iguaçu", latitude: -25.486583, longitude: -54.503099, potential: "Média", status: "A visitar" },
+  { id: "posto-rota-vila", name: "Auto Posto Shell — Rota Vila", segment: "Posto", address: "Av. Gramado, 2145 — Foz do Iguaçu", latitude: -25.497827, longitude: -54.552921, potential: "Alta", status: "A visitar" },
+  { id: "posto-azteca", name: "Posto Azteca", segment: "Posto", address: "Av. República Argentina — Foz do Iguaçu", latitude: -25.534498, longitude: -54.579769, potential: "Média", status: "A visitar" },
+  { id: "posto-ibiza", name: "Posto Ibiza", segment: "Posto", address: "Av. República Argentina — Foz do Iguaçu", latitude: -25.534359, longitude: -54.582605, potential: "Média", status: "A visitar" },
+  { id: "maxsul", name: "Posto Maxsul", segment: "Posto", address: "Vila Portes — Foz do Iguaçu", latitude: -25.513497, longitude: -54.588443, potential: "Média", status: "A visitar" },
+  // Estacionamentos e atrações: fluxo turístico e permanência relevante.
+  { id: "aeroporto", name: "Estacionamento Aeroporto Internacional de Foz do Iguaçu", segment: "Estacionamento", address: "Av. das Cataratas — Aeroporto IGU", latitude: -25.598927, longitude: -54.488233, potential: "Alta", status: "Em contato", contact: "Operação / infraestrutura" },
+  { id: "terra-cataratas", name: "Estacionamento Terra das Cataratas", segment: "Estacionamento", address: "Vila Portes — Foz do Iguaçu", latitude: -25.505585, longitude: -54.588174, potential: "Alta", status: "A visitar" },
+  { id: "aduana", name: "Estacionamento Aduana Brasileira", segment: "Estacionamento", address: "Ponte Internacional da Amizade — Foz do Iguaçu", latitude: -25.510015, longitude: -54.597302, potential: "Alta", status: "A visitar" },
+  { id: "dreamland", name: "Dreamland Foz do Iguaçu", segment: "Atração", address: "Rodovia das Cataratas, 8100 — Foz do Iguaçu", latitude: -25.592421, longitude: -54.517004, potential: "Alta", status: "A visitar" },
+  { id: "super-carros", name: "Super Carros — Dreamland", segment: "Atração", address: "Rodovia das Cataratas — Foz do Iguaçu", latitude: -25.591908, longitude: -54.516741, potential: "Alta", status: "A visitar" },
+  { id: "cataratas-show", name: "Cataratas Parque Show", segment: "Atração", address: "Rodovia das Cataratas — Foz do Iguaçu", latitude: -25.590784, longitude: -54.51761, potential: "Alta", status: "A visitar" },
+  { id: "itaipu", name: "Centro de Recepção de Visitantes — Itaipu", segment: "Atração", address: "Av. Tancredo Neves, 6702 — Foz do Iguaçu", latitude: -25.447072, longitude: -54.583882, potential: "Alta", status: "A visitar" },
+  { id: "skydive", name: "SkydiveFoz", segment: "Atração", address: "Foz do Iguaçu, PR", latitude: -25.46072, longitude: -54.596565, potential: "Média", status: "A visitar" },
+  { id: "bosque-guarani", name: "Parque Zoológico Bosque Guarani", segment: "Atração", address: "Centro — Foz do Iguaçu", latitude: -25.533091, longitude: -54.589887, potential: "Média", status: "A visitar" },
 ];
 
-const filters = ["Todos", "Hotel", "Posto", "Varejo", "Estacionamento"] as const;
+const filters = ["Todos", "Hotel", "Posto", "Varejo", "Estacionamento", "Atração"] as const;
 
 export default function VisitasPage() {
   const mapRef = useRef<HTMLDivElement | null>(null);
